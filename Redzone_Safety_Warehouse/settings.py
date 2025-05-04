@@ -121,4 +121,6 @@ INSTALLED_APPS += [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
+STATIC_ROOT = BASE_DIR / 'static'
+
 
