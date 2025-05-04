@@ -4,3 +4,4 @@ venv
 *.pyc
 Redzone_Safety_Warehouse/__pycache__/
 *.pem
+RSW.pem
