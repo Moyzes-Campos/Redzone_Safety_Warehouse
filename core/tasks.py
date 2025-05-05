@@ -3,18 +3,23 @@ from ultralytics import YOLO
 from celery import shared_task
 from django.conf import settings
 from .models import Video
+from django.core.exceptions import ObjectDoesNotExist
 
 
-@shared_task
-def process_video(video_id):
-    video = Video.objects.get(id=video_id)
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, max_retries=3)
+def process_video(self, video_id):
+    try:
+        video = Video.objects.get(id=video_id)
+    except ObjectDoesNotExist:
+
+        raise self.retry(countdown=5)
     inp = video.file.path
     out_dir = os.path.join(settings.MEDIA_ROOT, 'outputs')
     os.makedirs(out_dir, exist_ok=True)
 
     model = YOLO('core/weights/best.pt')
     results = model.predict(source=inp, save=True, project=out_dir,
-                            name=f'vid_{video_id}', conf=0.5)
+                            name=f'vid_{video_id}', conf=0.5, stream=True)
 
     detections = []
     for r in results:

@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from .models import Video
 from .serializers import VideoSerializer
 from .tasks import process_video  # vamos criar em breve
+from django.db import transaction
 
 
 class VideoViewSet(viewsets.ModelViewSet):
@@ -12,4 +13,4 @@ class VideoViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         video = serializer.save()
         # Dispara processamento assíncrono
-        process_video.delay(video.id)
+        transaction.on_commit(lambda: process_video.delay(video.id))
